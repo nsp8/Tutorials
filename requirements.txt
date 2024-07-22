@@ -1,3 +1,9 @@
 numpy
 pandas
 numexpr
+scipy
+matplotlib
+wave
+librosa
+soundfile
+pyaudio
