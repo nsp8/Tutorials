@@ -1,6 +1,7 @@
 from enum import StrEnum, unique
 from typing import Annotated, Optional, Self
 from rich import print
+from rich.console import Console
 from rich.panel import Panel
 from rich.pretty import Pretty
 from pydantic import BaseModel, ConfigDict, model_validator
@@ -8,6 +9,8 @@ import typer
 from utils import reverse_lookup
 
 app = typer.Typer(no_args_is_help=True)
+console = Console()
+null_params = list()
 
 
 @unique
@@ -16,6 +19,11 @@ class AppState(StrEnum):
     RUNNING = "running"
     EXITED = "exited"
     TERMINATED = "terminated"
+
+
+class ParametersAbsentException(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
 
 
 class CLIParams(BaseModel):
@@ -35,16 +43,14 @@ class CLIParams(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="after")
-    def validate_params(self) -> "CLIParams":
+    def validate_params(self) -> Self:
+        global null_params
         params = self.model_dump()
         params.pop("strict_mode")
         null_params = reverse_lookup(params).get(None)
 
         if not all(params.values()):
-            print(Panel.fit(f"These user parameters were not present: \n{null_params}", border_style="red"))
-            if not self.strict_mode:
-                typer.Exit(1)
-            return CLIParams(strict_mode=self.strict_mode, **prompt_for_params(null_params))
+            raise ParametersAbsentException("These user parameters were not present:")
         return self
 
 
@@ -86,24 +92,34 @@ def main(
         publish_delay_seconds: Annotated[Optional[int], typer.Argument()] = None,
         results_delay_seconds: Annotated[Optional[int], typer.Argument()] = None,
         results_file_path: Annotated[Optional[str], typer.Argument(parser=parse_string_inputs)] = None,
+        suppress_traceback: Annotated[bool, typer.Option()] = False,
 ):
-    cli_params = CLIParams(
-        strict_mode=strict_mode,
-        kafka_host=kafka_host,
-        kafka_port=kafka_port,
-        kafka_topic=kafka_topic,
-        m_and_v_host=m_and_v_host,
-        m_and_v_port=m_and_v_port,
-        m_and_v_api_slug=m_and_v_api_slug,
-        dispatch_file_path=dispatch_file_path,
-        meas_file_path=meas_file_path,
-        publish_delay_seconds=publish_delay_seconds,
-        results_delay_seconds=results_delay_seconds,
-        results_file_path=results_file_path,
-    )
-    pretty = Pretty(cli_params.model_dump())
-    panel = Panel(pretty)
-    print(panel)
+    global null_params
+    cli_params = None
+    try:
+        cli_params = CLIParams(
+            strict_mode=strict_mode,
+            kafka_host=kafka_host,
+            kafka_port=kafka_port,
+            kafka_topic=kafka_topic,
+            m_and_v_host=m_and_v_host,
+            m_and_v_port=m_and_v_port,
+            m_and_v_api_slug=m_and_v_api_slug,
+            dispatch_file_path=dispatch_file_path,
+            meas_file_path=meas_file_path,
+            publish_delay_seconds=publish_delay_seconds,
+            results_delay_seconds=results_delay_seconds,
+            results_file_path=results_file_path,
+        )
+    except ParametersAbsentException as e:
+        if not suppress_traceback:
+            console.print_exception(show_locals=False)
+        print(Panel.fit(f"{e if suppress_traceback else None}\n{null_params}", border_style="red"))
+        cli_params = CLIParams(strict_mode=strict_mode, **prompt_for_params(null_params))
+    finally:
+        pretty = Pretty(cli_params.model_dump())
+        panel = Panel(pretty)
+        print(panel)
 
 
 if __name__ == "__main__":
