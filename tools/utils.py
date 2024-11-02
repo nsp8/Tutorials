@@ -35,3 +35,22 @@ def describe_parameters(user_parameters: dict[str, Parameter]):
     for key, param in user_parameters.items():
         description[key] = param.value
     return description
+
+
+def capture(f):
+    def wrapper(*args, **kwargs):
+        import io
+        from contextlib import redirect_stdout, redirect_stderr
+        stdout_buffer = io.StringIO()
+        stderr_buffer = io.StringIO()
+
+        with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
+            f(*args, **kwargs)
+
+        stdout_output = stdout_buffer.getvalue()
+        stderr_output = stderr_buffer.getvalue()
+
+        print(f"Captured stdout:\n{stdout_output}")
+        if stderr_output:
+            print(f"Captured stderr:\n{stderr_output}")
+    return wrapper
