@@ -1,5 +1,5 @@
-from leetcode_practice.fibonacci_logn import utils
-from leetcode_practice.fibonacci_logn.square_matrix import SquareMatrix
+from practice.fibonacci_logn import utils
+from practice.fibonacci_logn.square_matrix import SquareMatrix
 
 
 def test_mul2_different(matrix2):

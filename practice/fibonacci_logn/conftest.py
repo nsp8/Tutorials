@@ -1,5 +1,5 @@
 from pytest import fixture
-from leetcode_practice.fibonacci_logn.square_matrix import SquareMatrix
+from practice.fibonacci_logn.square_matrix import SquareMatrix
 
 
 @fixture
