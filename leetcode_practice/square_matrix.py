@@ -44,6 +44,24 @@ class SquareMatrix:
             raise ValueError("Square matrices should have the same size")
         raise ValueError("Other argument has to be a SquareMatrix")
 
+    @staticmethod
+    def identity(n):
+        matrix = [0] * (n ** 2)
+        one_pos = [(n + 1) * i for i in range(n)]
+        for pos in one_pos:
+            matrix[pos] = 1
+        return SquareMatrix(*matrix, size=n)
+
+    def __pow__(self, power, modulo=None):
+        result = SquareMatrix.identity(n=self.size)
+        base = self
+        while power > 0:
+            if power % 2 == 1:
+                result *= base
+            base *= base
+            power //= 2
+        return result
+
 
 def square_matrix_multiplication(a: SquareMatrix, b: SquareMatrix) -> SquareMatrix:
     c = deepcopy(a)
@@ -52,3 +70,10 @@ def square_matrix_multiplication(a: SquareMatrix, b: SquareMatrix) -> SquareMatr
             v = [a.vector[row][k] * b.vector[k][col] for k in range(a.size)]
             c.vector[row][col] = sum(v)
     return c
+
+
+def fibonacci(n):
+    if n in (0, 1):
+        return n
+    matrix = SquareMatrix(1, 1, 1, 0, size=2) ** (n - 1)
+    return matrix[0][0]
