@@ -1,5 +1,5 @@
 import pytest
-from leetcode_practice.square_matrix import (
+from leetcode_practice.fibonacci_logn.square_matrix import (
     SquareMatrix,
     square_matrix_multiplication,
     fibonacci

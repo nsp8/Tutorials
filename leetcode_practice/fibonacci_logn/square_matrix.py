@@ -1,6 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
-from leetcode_practice import utils
+from leetcode_practice.fibonacci_logn import utils
 
 
 @dataclass
