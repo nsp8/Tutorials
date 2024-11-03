@@ -3,4 +3,5 @@ pandas
 numexpr
 rich
 pydantic
+pytest
 typer
