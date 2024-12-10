@@ -26,6 +26,7 @@ class Browser:
     driver: webdriver.Chrome = field(default_factory=webdriver.Chrome)
     options: Options = field(default_factory=Options)
     action_count: int = 0
+    is_headless: bool = False
 
     def create_options(
         self,
@@ -37,6 +38,7 @@ class Browser:
         if is_detached:
             self.options.add_experimental_option("detach", is_detached)
         if is_headless:
+            self.is_headless = is_headless
             self.options.add_argument("--headless")
         if is_gpu_disabled:
             self.options.add_argument("--disable-gpu")
@@ -124,7 +126,7 @@ class Browser:
         if buttons:
             for e, w in zip(buttons, map(lambda el: el.text, buttons)):
                 if w.strip().lower() == "not now":
-                    print("Not saving login info...")
+                    print("Not saving login info ...")
                     e.click()
 
     @utils.delay
@@ -138,7 +140,7 @@ class Browser:
         if buttons:
             for e, w in zip(buttons, map(lambda el: el.text, buttons)):
                 if w.strip().lower() == "not now":
-                    print("Rejecting notifications...")
+                    print("Rejecting notifications ...")
                     e.click()
 
     @utils.delay

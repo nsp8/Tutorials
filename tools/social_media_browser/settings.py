@@ -1,5 +1,5 @@
 DETACHED = True
-HEADLESS = False
+HEADLESS = True
 GPU_DISABLED = False
 INSTAGRAM_LOGIN_URL = "https://www.instagram.com/"
 INSTAGRAM_HOME_URL = "https://www.instagram.com/"

@@ -42,13 +42,17 @@ class User:
         return self
 
     def save_recent_chat_info(self):
+        print("Saving recent chats ...")
         recent_chats = self.browser.get_inbox_latest()
         file_path = f"{Path(__file__).parent}/user_data.json"
         old_contents = dict()
         if Path(file_path).exists():
+            print("\tFound chat history!")
             with open(file_path, "r") as r:
                 old_contents.update(json.load(r))
 
+        print("Updating contents ...")
         updated = update_contents(old_contents, recent_chats)
         with open(file_path, "w") as w:
+            print("\tWriting contents ...")
             json.dump(updated, w, indent=2)
