@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-import re
+from re import search
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+import tools.social_media_browser.settings as settings
 from tools.social_media_browser.states import App
 import tools.social_media_browser.utils as utils
 
@@ -20,6 +21,13 @@ class Application:
 
 
 @dataclass
+class BrowserOptions:
+    is_detached: bool = settings.DETACHED
+    is_headless: bool = settings.HEADLESS
+    is_gpu_disabled: bool = settings.GPU_DISABLED
+
+
+@dataclass
 class Browser:
     wait_timeout: int = 30
     application: Application = field(default_factory=Application)
@@ -28,20 +36,16 @@ class Browser:
     action_count: int = 0
     is_headless: bool = False
 
-    def create_options(
-        self,
-        is_headless: bool = False,
-        is_detached: bool = True,
-        is_gpu_disabled: bool = False
-    ):
+    def create_options(self, options: BrowserOptions):
         self.options = Options()
-        if is_detached:
-            self.options.add_experimental_option("detach", is_detached)
-        if is_headless:
-            self.is_headless = is_headless
+        if options.is_detached:
+            self.options.add_experimental_option("detach", options.is_detached)
+        if options.is_headless:
+            self.is_headless = options.is_headless
             self.options.add_argument("--headless")
-        if is_gpu_disabled:
+        if options.is_gpu_disabled:
             self.options.add_argument("--disable-gpu")
+        return self
 
     def authenticate(self, username, password):
         self.driver = webdriver.Chrome(options=self.options)
@@ -145,6 +149,7 @@ class Browser:
 
     @utils.delay
     def get_inbox_latest(self):
+        # TODO: Get more chats
         chat_contents = dict()
         buttons = WebDriverWait(self.driver, self.wait_timeout).until(
             expected_conditions.presence_of_all_elements_located(
@@ -152,7 +157,7 @@ class Browser:
             )
         )
         chat_elements = [
-            el for el in buttons if re.search("user avatar", el.accessible_name.lower())
+            el for el in buttons if search("user avatar", el.accessible_name.lower())
         ]
         for chat in chat_elements:
             chat.click()
@@ -175,8 +180,8 @@ class Browser:
         self.driver.quit()
 
 
-def create_browser(app: App, login_url, home_url, poi_url):
+def create_browser(app: App, login_url, home_url, poi_url, options: BrowserOptions):
     app = Application(
         app_name=app, login_url=login_url, home_url=home_url, poi_url=poi_url
     )
-    return Browser(application=app)
+    return Browser(application=app).create_options(options=options)
