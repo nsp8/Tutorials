@@ -166,6 +166,7 @@ class Browser:
         while not chat_contents and self.action_count < 10:
             self.action_count += 1
             self.get_inbox_latest()
+        self.action_count = 0
         return chat_contents
 
     def close(self):
