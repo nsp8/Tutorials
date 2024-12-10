@@ -1,0 +1,9 @@
+DETACHED = True
+HEADLESS = False
+GPU_DISABLED = False
+INSTAGRAM_LOGIN_URL = "https://www.instagram.com/"
+INSTAGRAM_HOME_URL = "https://www.instagram.com/"
+INSTAGRAM_INBOX_URL = "https://www.instagram.com/direct/inbox/"
+TWITTER_LOGIN_URL = "https://twitter.com/i/flow/login"
+TWITTER_HOME_URL = "https://twitter.com/home"
+TWITTER_BOOKMARKS_URL = "https://twitter.com/i/bookmarks"
