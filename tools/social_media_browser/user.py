@@ -9,24 +9,22 @@ from tools.social_media_browser.utils import get_latest_file_version, update_con
 
 @dataclass
 class User:
-    username: str
-    password: str
     browser: Browser = field(default_factory=Browser)
     current_state: States = field(default=States.not_authenticated)
 
-    def login(self):
-        if not self.username:
-            self.username = input("Enter your username: ")
-        if not self.password:
-            self.password = input("Enter your password: ")
+    def login(self, username, password):
+        if not username:
+            username = input("Enter your username: ")
+        if not password:
+            password = input("Enter your password: ")
         # self.browser.create_options(settings.HEADLESS, settings.DETACHED, settings.GPU_DISABLED)
         if self.browser.application.app_name == App.instagram:
-            self.browser.authenticate_together(self.username, self.password)
+            self.browser.authenticate_together(username, password)
             self.browser.reject_save_login()
             # TODO: find a way to find if user is authenticated
             self.current_state = States.authenticated
         elif self.browser.application.app_name == App.twitter:
-            self.browser.authenticate(self.username, self.password)
+            self.browser.authenticate(username, password)
             # if self.browser.get_current_url() == settings.HOME_URL:
             if "home" in self.browser.get_current_url():
                 self.current_state = States.authenticated
@@ -47,14 +45,17 @@ class User:
         dir_path = Path(__file__).parent
         file_version = get_latest_file_version(dir_path)
         file_name = settings.INSTAGRAM_OUTPUT_FILENAME_PREFIX
-        file_path = f"{dir_path}/{file_name}_{file_version}.json"
+        output_location = Path(f"{dir_path}/output")
+        if not output_location.exists():
+            output_location.mkdir()
+        file_path = f"{output_location}/{file_name}_{file_version}.json"
         old_contents = dict()
         if Path(file_path).exists():
             print("\tFound chat history!")
             with open(file_path, "r") as r:
                 old_contents.update(json.load(r))
         if store_new:
-            file_path = f"{dir_path}/{file_name}_{file_version + 1}.json"
+            file_path = f"{output_location}/{file_name}_{file_version + 1}.json"
             with open(file_path, "w") as n:
                 print("Saving data in new file ...")
                 json.dump(recent_chats, n, indent=2)

@@ -17,8 +17,10 @@ def save_instagram_recent_chats(
         poi_url=settings.INSTAGRAM_INBOX_URL,
         options=browser_options
     )
-    user = User(username=username, password=password, browser=browser)
-    user.login().open_point_of_interest().save_recent_chat_info(store_new=store_new)
+    user = User(browser=browser)
+    user.login(
+        username=username, password=password
+    ).open_point_of_interest().save_recent_chat_info(store_new=store_new)
     if user.browser.is_headless:
         user.browser.close()
     return user
