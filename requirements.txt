@@ -4,4 +4,7 @@ numexpr
 rich
 pydantic
 pytest
+requests
+requests-sse  # Server-Sent Events
 typer
+quixstreams
