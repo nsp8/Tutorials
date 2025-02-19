@@ -1,0 +1,8 @@
+*.idea/*
+*.DS_Store
+*__pycache__/
+data_engineering/airflow_project/.env
+*data_engineering/airflow_project/config/*
+*data_engineering/airflow_project/logs/*
+*data_engineering/airflow_project/plugins/*
+
