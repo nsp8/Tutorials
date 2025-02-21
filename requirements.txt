@@ -5,3 +5,5 @@ rich
 pydantic
 pytest
 typer
+fastapi[standard]
+sqlalchemy
