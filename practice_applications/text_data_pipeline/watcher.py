@@ -7,6 +7,7 @@ from pprint import pformat
 from dotenv import load_dotenv
 import requests
 import constants
+from message_producer import KafkaProducer
 
 load_dotenv()
 
@@ -68,21 +69,30 @@ def show_collection(playlist_videos: list) -> None:
     logging.info(pformat(playlist_videos))
 
 
-def collect_youtube_playlist(show_stream: bool = False):
+def collect_youtube_playlist(stream: bool = False) -> None:
     logging.info("START")
     api_key = os.getenv("YOUTUBE_API_KEY")
     playlist_id = constants.PLAYLIST_ID
     videos: list = list()
-    if not show_stream:
+    if not stream:
         logging.info("Collecting data ...")
     for item in fetch_playlist_items(api_key, playlist_id):
         video_id = item.get("contentDetails").get("videoId")
         for video in fetch_videos(api_key, video_id):
             video_data = summarize_data(video)
             if video_data not in videos:
-                if show_stream:
+                if stream:
                     logging.info(pformat(video_data))
+
                 videos.append(video_data)
+                with KafkaProducer(
+                    bootstrap_servers=constants.BOOTSTRAP_SERVERS
+                ) as producer:
+                    producer.produce_message(
+                        topic=constants.KAFKA_TOPIC,
+                        key=video_id,
+                        value=json.dumps(video_data)
+                    )
         time.sleep(2)
     show_collection(videos)
 

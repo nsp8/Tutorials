@@ -1,10 +1,10 @@
 services:
   flyway:
     image: flyway/flyway:11.3.3
-    command: -configFiles=/flyway/conf/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    command: -configFiles=/flyway/conf/flyway.producer_config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
     volumes:
       - ${PWD}/sql_versions:/flyway/sql
-      - ${PWD}/docker-flyway.config:/flyway/conf/flyway.config
+      - ${PWD}/docker-flyway.producer_config:/flyway/conf/flyway.producer_config
     depends_on:
       - postgres
     networks:
@@ -31,15 +31,15 @@ services:
     image: apache/kafka:latest
     container_name: kafka_broker
     ports:
-      - "9092:29092"
+      - "29092:29092"  # Fix port mapping
     networks:
       - text_data_pipeline
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://kafka_broker:9092,CONTROLLER://kafka_broker:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_broker:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://kafka_broker:9092,PLAINTEXT_HOST://0.0.0.0:29092,CONTROLLER://kafka_broker:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka_broker:9092,PLAINTEXT_HOST://localhost:29092  # Correct mapping
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka_broker:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
