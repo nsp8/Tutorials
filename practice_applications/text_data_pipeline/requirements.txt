@@ -1,0 +1,5 @@
+python-dotenv
+requests
+confluent-kafka
+apache-airflow
+newsapi-python
