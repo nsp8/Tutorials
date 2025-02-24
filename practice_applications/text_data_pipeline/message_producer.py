@@ -32,6 +32,7 @@ class KafkaProducer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.producer:
+            print("Exiting producer ...")
             self.producer.flush()
         if exc_type:
             print(f"Exception occurred: {exc_val}")
