@@ -6,4 +6,5 @@ numexpr
 rich
 pydantic
 pytest
+sqlalchemy
 typer

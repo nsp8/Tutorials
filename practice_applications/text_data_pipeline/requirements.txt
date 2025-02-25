@@ -3,3 +3,5 @@ requests
 confluent-kafka
 apache-airflow
 newsapi-python
+psycopg2
+sqlalchemy

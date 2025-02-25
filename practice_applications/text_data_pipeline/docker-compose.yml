@@ -3,8 +3,8 @@ services:
     image: flyway/flyway:11.3.3
     command: -configFiles=/flyway/conf/flyway.producer_config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
     volumes:
-      - ${PWD}/sql_versions:/flyway/sql
-      - ${PWD}/docker-flyway.producer_config:/flyway/conf/flyway.producer_config
+      - ${PWD}/flyway_migrations:/flyway/sql
+      - ${PWD}/docker-flyway.config:/flyway/conf/flyway.producer_config
     depends_on:
       - postgres
     networks:
