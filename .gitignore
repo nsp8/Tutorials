@@ -6,3 +6,5 @@ data_engineering/airflow_project/.env
 *data_engineering/airflow_project/logs/*
 *data_engineering/airflow_project/plugins/*
 
+**/**/.env
+**/.env
