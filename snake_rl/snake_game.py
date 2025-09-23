@@ -10,8 +10,8 @@ import pygame
 import constants as c
 
 pygame.init()
-font = pygame.font.Font(f"arial.ttf", c.DEFAULT_FONT_SIZE)
-#font = pygame.font.SysFont("arial", 25)
+# font = pygame.font.Font(f"arial.ttf", c.DEFAULT_FONT_SIZE)
+font = pygame.font.SysFont("arial", 25)
 Point = namedtuple("Point", "x, y")
 
 
