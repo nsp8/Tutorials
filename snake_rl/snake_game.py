@@ -99,6 +99,8 @@ class SnakeGame:
         # 3. check if game over
         reward = 0
         is_game_over = False
+        # if the snake collides with the wall or
+        # the snake grows too large
         if self.is_collision() or self.frame_iteration > 100 * len(self.snake):
             is_game_over = True
             reward = -10
@@ -160,14 +162,13 @@ class SnakeGame:
             # [straight, right, left]
             clockwise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
             current_direction_index = clockwise.index(self.direction)
-            if np.array_equal(action, [1, 0, 0]):
-                new_direction = clockwise[current_direction_index]
-            elif np.array_equal(action, [0, 1, 0]):
-                new_direction = clockwise[(current_direction_index + 1) % 4]
-            else:  # [0, 0, 1]
-                new_direction = clockwise[(current_direction_index - 1) % 4]
+            if np.array_equal(action, [1, 0, 0]):  # same direction
+                self.direction = clockwise[current_direction_index]
+            elif np.array_equal(action, [0, 1, 0]):  # move right
+                self.direction = clockwise[(current_direction_index + 1) % 4]
+            else:  # [0, 0, 1]  (move left)
+                self.direction = clockwise[(current_direction_index - 1) % 4]
 
-            self.direction = new_direction
         x = self.head.x
         y = self.head.y
         if self.direction == Direction.RIGHT:
@@ -180,9 +181,44 @@ class SnakeGame:
             y -= c.BLOCK_SIZE
         self.head = Point(x, y)
 
+    def get_snake_head(self):
+        head = self.snake[0]
+        left = Point(head.x - c.BLOCK_SIZE, head.y)
+        right = Point(head.x + c.BLOCK_SIZE, head.y)
+        up = Point(head.x, head.y - c.BLOCK_SIZE)
+        down = Point(head.x, head.y + c.BLOCK_SIZE)
+        return left, right, up, down
+
+    def is_danger_straight(self) -> bool:
+        l, r, u, d = self.get_snake_head()
+        return (
+            (self.direction == Direction.UP and self.is_collision(u)) or
+            (self.direction == Direction.RIGHT and self.is_collision(r)) or
+            (self.direction == Direction.DOWN and self.is_collision(d)) or
+            (self.direction == Direction.LEFT and self.is_collision(l))
+        )
+
+    def is_danger_right(self) -> bool:
+        l, r, u, d = self.get_snake_head()
+        return (
+            (self.direction == Direction.UP and self.is_collision(r)) or
+            (self.direction == Direction.RIGHT and self.is_collision(d)) or
+            (self.direction == Direction.DOWN and self.is_collision(l)) or
+            (self.direction == Direction.LEFT and self.is_collision(u))
+        )
+
+    def is_danger_left(self) -> bool:
+        l, r, u, d = self.get_snake_head()
+        return (
+            (self.direction == Direction.UP and self.is_collision(l)) or
+            (self.direction == Direction.RIGHT and self.is_collision(u)) or
+            (self.direction == Direction.DOWN and self.is_collision(r)) or
+            (self.direction == Direction.LEFT and self.is_collision(d))
+        )
+
 
 def play_human():
-    game = SnakeGame()
+    game = SnakeGame(mode=PlayerMode.HUMAN)
     # game loop
     while True:
         _, game_over, score = game.play_step(action=None)

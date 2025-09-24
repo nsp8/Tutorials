@@ -4,43 +4,89 @@ import torch
 import numpy as np
 from snake_game import SnakeGame, Direction, Point
 import constants as c
-from snake_rl.constants import MAX_MEMORY
 
 
 class Agent:
     def __init__(self):
-        self.n_games = 0
-        self.epsilon = 0
-        self.gamma = 0
+        self.n_games: int = 0
+        self.epsilon: float = 0  # randomness
+        self.gamma: float = 0  # discount rate
         self.memory = deque(maxlen=c.MAX_MEMORY)
-        # TODO: add model and trainer
+        # TODO: implement model and trainer
+        self.model = None
+        self.trainer = None
 
-    def get_state(self, game):
-        ...
+    @staticmethod
+    def get_state(game):
+        # the state space consists of 11 states
+        state: list = [
+            game.is_danger_straight(), game.is_danger_right(), game.is_danger_left(),
+            game.direction == Direction.LEFT,
+            game.direction == Direction.RIGHT,
+            game.direction == Direction.UP,
+            game.direction == Direction.DOWN,
+            game.food.x < game.head.x,  # food: at left
+            game.food.x > game.head.x,  # food: at right
+            game.food.y < game.head.x,  # food: at up
+            game.food.y > game.head.x,  # food: at down
+        ]
+        return np.array(state, dtype=int)  # bool -> binary
 
-    def remember(self, state, action, reward, next_state, status):
-        ...
+    def remember(self, state, action, reward, next_state, game_status):
+        self.memory.append((state, action, reward, next_state, game_status))
+        # popleft if MAX_MEMORY is reached
 
     def train_long_memory(self):
-        ...
+        sample = random.sample(self.memory, c.BATCH_SIZE) \
+            if len(self.memory) > c.BATCH_SIZE \
+            else self.memory
+        self.trainer.train_step(zip(*sample))
 
-    def train_short_memory(self):
-        ...
+    def train_short_memory(self, state, action, reward, next_state, game_status):
+        self.trainer.train_step(state, action, reward, next_state, game_status)
+        self.remember(state, action, reward, next_state, game_status)
 
     def get_action(self, state):
-        ...
+        # epsilon-greedy random moves: exploration-exploitation tradeoff
+        self.epsilon = 80 - self.n_games
+        action: list = [0, 0, 0]
+        if random.randint(0, 200) < self.epsilon:
+            move = random.randint(0, 2)
+        else:
+            state_current = torch.tensor(state, dtype=torch.float)
+            prediction = self.model.predict(state_current)  # -> e.g. [5.0, 2.7, 1.0]
+            move = torch.argmax(prediction).item()  # -> 0
+        action[move] = 1
+        return action
 
 
 def train():
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    agent = Agent()
-    game = SnakeGame()
+    plot_scores: list = []
+    plot_mean_scores: list = []
+    total_score: int = 0
+    best_score: int = 0
+    agent: Agent = Agent()
+    game: SnakeGame = SnakeGame()
     while True:
-        state_old = agent.get_state(game)
+        # get current state
+        state_current = agent.get_state(game)
+        # get move based on the current state
+        action = agent.get_action(state_current)
+        # perform move and get new state
+        reward, status, score = game.play_step(action)
+        # get the next state
+        state_new = agent.get_state(game)
+        # train short memory of the agent
+        agent.train_short_memory(state_current, action, reward, state_new, status)
+        if status:
+            # train long memory of the agent and plot result
+            game.reset()
+            agent.n_games += 1
+            agent.train_long_memory()
+            best_score = max(best_score, score)
+            print(f"Game {agent.n_games}: \tScore: {score} \t Best: {best_score}")
+            # TODO: plot
 
 
-def main():
+if __name__ == "__main__":
     train()
