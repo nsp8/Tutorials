@@ -1,0 +1,23 @@
+# rgb colors
+WHITE = (255, 255, 255)
+RED = (200, 0, 0)
+BLUE1 = (0, 0, 255)
+BLUE2 = (0, 100, 255)
+BLACK = (0, 0, 0)
+
+BLOCK_SIZE = 20
+SPEED = 20
+DEFAULT_FONT_SIZE = 25
+GAME_WIDTH = 640
+GAME_HEIGHT = 480
+MAX_MEMORY = 100_000
+
+# Hyperparameters
+BATCH_SIZE = 1000
+LEARNING_RATE = 0.005
+GAMMA = 0.9  # discount rate
+
+# Model layers
+INPUT_SIZE = 11
+HIDDEN_SIZE = 256
+OUTPUT_SIZE = 3
