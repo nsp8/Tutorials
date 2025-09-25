@@ -58,7 +58,7 @@ class Agent:
             state_current = torch.tensor(state, dtype=torch.float)
             # self.model(state) calls the forward method with the state arg
             prediction = self.model(state_current)  # -> e.g. [5.0, 2.7, 1.0]
-            move = torch.argmax(prediction).item()  # -> 0
+            move = torch.argmax(prediction).item()  # -> e.g. 0
         action[move] = 1
         return action
 
