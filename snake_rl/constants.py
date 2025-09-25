@@ -14,4 +14,10 @@ MAX_MEMORY = 100_000
 
 # Hyperparameters
 BATCH_SIZE = 1000
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.005
+GAMMA = 0.9  # discount rate
+
+# Model layers
+INPUT_SIZE = 11
+HIDDEN_SIZE = 256
+OUTPUT_SIZE = 3

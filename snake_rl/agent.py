@@ -4,17 +4,19 @@ import torch
 import numpy as np
 from snake_game import SnakeGame, Direction, Point
 import constants as c
+from model import LinearQNet
+from trainer import QTrainer
+from plot import plot
 
 
 class Agent:
     def __init__(self):
         self.n_games: int = 0
         self.epsilon: float = 0  # randomness
-        self.gamma: float = 0  # discount rate
         self.memory = deque(maxlen=c.MAX_MEMORY)
         # TODO: implement model and trainer
-        self.model = None
-        self.trainer = None
+        self.model = LinearQNet(c.INPUT_SIZE, c.HIDDEN_SIZE, c.OUTPUT_SIZE)
+        self.trainer = QTrainer(self.model, lr=c.LEARNING_RATE, gamma=c.GAMMA)
 
     @staticmethod
     def get_state(game):
@@ -40,7 +42,7 @@ class Agent:
         sample = random.sample(self.memory, c.BATCH_SIZE) \
             if len(self.memory) > c.BATCH_SIZE \
             else self.memory
-        self.trainer.train_step(zip(*sample))
+        self.trainer.train_step(*zip(*sample))
 
     def train_short_memory(self, state, action, reward, next_state, game_status):
         self.trainer.train_step(state, action, reward, next_state, game_status)
@@ -54,7 +56,8 @@ class Agent:
             move = random.randint(0, 2)
         else:
             state_current = torch.tensor(state, dtype=torch.float)
-            prediction = self.model.predict(state_current)  # -> e.g. [5.0, 2.7, 1.0]
+            # self.model(state) calls the forward method with the state arg
+            prediction = self.model(state_current)  # -> e.g. [5.0, 2.7, 1.0]
             move = torch.argmax(prediction).item()  # -> 0
         action[move] = 1
         return action
@@ -85,7 +88,12 @@ def train():
             agent.train_long_memory()
             best_score = max(best_score, score)
             print(f"Game {agent.n_games}: \tScore: {score} \t Best: {best_score}")
-            # TODO: plot
+            agent.model.save()
+            plot_scores.append(best_score)
+            total_score += best_score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
+            plot(plot_scores, plot_mean_scores)
 
 
 if __name__ == "__main__":
