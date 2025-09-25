@@ -2,7 +2,7 @@ from collections import deque
 import random
 import torch
 import numpy as np
-from snake_game import SnakeGame, Direction, Point
+from snake_game import SnakeGame, Direction, PlayerMode
 import constants as c
 from model import LinearQNet
 from trainer import QTrainer
@@ -69,7 +69,7 @@ def train():
     total_score: int = 0
     best_score: int = 0
     agent: Agent = Agent()
-    game: SnakeGame = SnakeGame()
+    game: SnakeGame = SnakeGame(mode=PlayerMode.AI)
     while True:
         # get current state
         state_current = agent.get_state(game)
