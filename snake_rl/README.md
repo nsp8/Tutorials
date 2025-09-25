@@ -1,5 +1,18 @@
 # Snake game 
-### using DQN and PyGame
+using DQN and PyGame
+
+---
+## Play
+1. Clone the repository
+2. Install all the requirements
+3. If you want to play the snake game:
+```commandline
+python3 snake_game.py
+```
+But if you want the agent to play the snake game:
+```commandline
+python3 agent.py
+```
 
 ---
 ## Overview
@@ -47,5 +60,5 @@ Examples:
 ---
 ## Deep Learning (Feed Forward NN)
 - input: 11 boolean values from the state
-- \<hidden layer\>
+- \<hidden layer\>: 256
 - output (with an activation function like `max`) : 3 (action)
